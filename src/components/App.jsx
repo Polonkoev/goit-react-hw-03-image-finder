@@ -4,11 +4,11 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 import css from './App.module.css';
 import { fetchImages } from './Query/Query';
-import { Searchbar } from './Searchbar/Searchbar';
+import  Searchbar  from './Searchbar/Searchbar';
 import { imageMapper } from './imageMapper/imageMapper';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
-import  Modal  from './Modal/Modal';
+import Modal from './Modal/Modal';
 
 class App extends Component {
   state = {
@@ -23,19 +23,17 @@ class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    const { page } = this.state;
-    if (prevState.page !== page) {
+    const { page, q } = this.state;
+    if (prevState.page !== page || prevState.q !== q) {
       this.getImage();
+      
     }
-
- 
   }
 
   getImage = () => {
     if (this.state.q !== '') {
-      
       const { page, q } = this.state;
-      this.setState({ isLoading: true });
+      this.setState({ isLoading: true});
       fetchImages(page, q)
         .then(({ data: { hits } }) => {
           hits.length >= 12
@@ -54,25 +52,30 @@ class App extends Component {
         })
         .finally(() => this.setState({ isLoading: false }));
     } else {
-      Notify.info(' Please enter something .. ')
-      this.setState({isLoadMore: false})
+      
+      this.setState({ isLoadMore: false });
       return;
     }
   };
-  submitHandler = event => {
-    event.preventDefault();
-
-    this.getImage();
-    this.setState({ page: 1, response: [] });
+  submitHandler = data => {
+   
+    this.setState({q: data})
+    this.setState({
+      page: 1,
+      response: [],
+      isShown: false,
+      isLoadMore: false,
+      isLoading: false,
+    });
   };
 
-  inputHandler = ({ target: { value } }) => {
-    this.setState({ q: value });
-  };
+ 
+ 
 
   nextPageHandler = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
+      
     }));
   };
 
@@ -80,18 +83,17 @@ class App extends Component {
     this.setState({ currentImage: data });
   };
 
-  
   closeModal = () => {
     this.setState({ currentImage: null });
   };
 
   render() {
-    const { isLoadMore, isShown, isLoading, currentImage } = this.state;
+    const { isLoadMore, isShown, isLoading, currentImage} = this.state;
     return (
       <>
         <Searchbar
           submitHandler={this.submitHandler}
-          onChange={this.inputHandler}
+          queryUpdate={this.queryUpdate}
         />
         {isShown && (
           <ImageGallery data={this.state.response} openModal={this.openModal} />
@@ -100,7 +102,9 @@ class App extends Component {
         {isLoadMore && (
           <Button text="Load more" handler={this.nextPageHandler} />
         )}
-        {currentImage !== null && <Modal closeModal={this.closeModal} data={currentImage} />}
+        {currentImage !== null && (
+          <Modal closeModal={this.closeModal} data={currentImage} />
+        )}
         {/* <Modal data={currentImage} /> */}
 
         {isLoading && (
