@@ -59,14 +59,12 @@ class App extends Component {
   };
   submitHandler = data => {
    
-    this.setState({q: data})
-    this.setState({
-      page: 1,
+    this.setState({q: data, page: 1,
       response: [],
       isShown: false,
       isLoadMore: false,
-      isLoading: false,
-    });
+      isLoading: false,})
+    
   };
 
  
